@@ -3,8 +3,10 @@
 import os, sys
 import numpy as np
 import pandas as pd
-from mpmath import *
+from matplotlib import pyplot as plt
 
-mp.dps=1000
-aa=exp(1.5+2j)
-print(exp(1.5+2j))
+df = pd.DataFrame(np.random.randn(100))
+print(f'DataFrame={df}')
+histogram = df.hist()
+plt.show()
+aa=5

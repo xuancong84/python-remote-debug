@@ -54,3 +54,19 @@ To simply the launch process into a single click, you will need to create a pre-
 }
 ```
 where all symbols are defined in the same way as in Step 2 above. The full command consists of three parts: 1. rsync local source codes to the remote server; 2. launch the remote debug server via ssh and set it to background; 3. wait for the debug port to be ready.
+
+## X11 tunneling for GUI
+If you need to use Python graphics libraries like `matplotlib` to plot charts, you will need X11 tunneling via SSH. To do so:
+1. In another terminal, SSH to the remote server with X11 forwarding enabled, `ssh -YC xxx.xxx.xxx.xxx`
+2. In that terminal, get the DISPLAY port number, `echo $DISPLAY`, it will be typically something like `localhost:0.0`
+3. Modify the 2nd command in `tasks.json` from:
+```
+ssh xxx.xxx.xxx.xxx 'cd projects/test-debug-server/; python -m debugpy --listen xxx.xxx.xxx.xxx:12345 --wait-for-client your-python-code.py'
+```
+into
+```
+ssh -YC xxx.xxx.xxx.xxx 'cd projects/test-debug-server/; DISPLAY=localhost:0.0 python -m debugpy --listen xxx.xxx.xxx.xxx:12345 --wait-for-client your-python-code.py'
+```
+with the correct DISPLAY environment variable.
+
+Remember, as long as you want to display something via X11 tunnel in remote debugging, that SSH session in the separate terminal must be kept running.
