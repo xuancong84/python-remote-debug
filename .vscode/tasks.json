@@ -4,7 +4,7 @@
         {
             "label": "prepare",
             "type": "shell",
-            "command": "rsync -avlP ../python-remote-debug $comp6:./projects/ && (ssh -YC $comp6 'cd projects/python-remote-debug/;DISPLAY=:0.0 ~/anaconda3/bin/python -m debugpy --listen 10.8.0.6:12345 --wait-for-client your-python-code.py' & while ! ssh $comp6 netstat -tnl | grep :12345; do sleep 0.1; done)"
+            "command": "rsync -avlP ../python-remote-debug $comp6:./projects/ && (ssh -YC $comp6 'cd projects/python-remote-debug/;DISPLAY=:0.0 ~/anaconda3/bin/python -m debugpy --listen 10.8.0.6:12345 --wait-for-client your-python-code.py 1>/dev/null 2>/dev/null' & while ! ssh $comp6 netstat -tnl | grep :12345; do sleep 0.1; done)"
         }
     ]
 }

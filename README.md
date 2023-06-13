@@ -48,12 +48,12 @@ To simply the launch process into a single click, you will need to create a pre-
         {
             "label": "prepare",
             "type": "shell",
-            "command": "rsync -avlP * xxx.xxx.xxx.xxx:./projects/python-remote-debug/ && (ssh xxx.xxx.xxx.xxx 'cd projects/test-debug-server/; python -m debugpy --listen xxx.xxx.xxx.xxx:12345 --wait-for-client your-python-code.py' & while ! ssh xxx.xxx.xxx.xxx netstat -tnl | grep :12345; do sleep 0.1; done)"
+            "command": "rsync -avlP * xxx.xxx.xxx.xxx:./projects/python-remote-debug/ && (ssh xxx.xxx.xxx.xxx 'cd projects/test-debug-server/; python -m debugpy --listen xxx.xxx.xxx.xxx:12345 --wait-for-client your-python-code.py 1>/dev/null 2>/dev/null' & while ! ssh xxx.xxx.xxx.xxx netstat -tnl | grep :12345; do sleep 0.1; done)"
         }
     ]
 }
 ```
-where all symbols are defined in the same way as in Step 2 above. The full command consists of three parts: 1. rsync local source codes to the remote server; 2. launch the remote debug server via ssh and set it to background; 3. wait for the debug port to be ready.
+where all symbols are defined in the same way as in Step 2 above. The full command consists of three parts: 1. rsync local source codes to the remote server; 2. launch the remote debug server via ssh and set it to background; 3. wait for the debug port to be ready. Take note that `1>/dev/null 2>/dev/null` is neccessary if your program has STDOUT/STDERR output.
 
 ## X11 tunneling for GUI
 If you need to use Python graphics libraries like `matplotlib` to plot charts, you will need X11 tunneling via SSH. To do so:
@@ -61,11 +61,11 @@ If you need to use Python graphics libraries like `matplotlib` to plot charts, y
 2. In that terminal, get the DISPLAY port number, `echo $DISPLAY`, it will be typically something like `localhost:0.0`
 3. Modify the 2nd command in `tasks.json` from:
 ```
-ssh xxx.xxx.xxx.xxx 'cd projects/test-debug-server/; python -m debugpy --listen xxx.xxx.xxx.xxx:12345 --wait-for-client your-python-code.py'
+ssh xxx.xxx.xxx.xxx 'cd projects/test-debug-server/; python -m debugpy --listen xxx.xxx.xxx.xxx:12345 --wait-for-client your-python-code.py 1>/dev/null 2>/dev/null'
 ```
 into
 ```
-ssh -YC xxx.xxx.xxx.xxx 'cd projects/test-debug-server/; DISPLAY=localhost:0.0 python -m debugpy --listen xxx.xxx.xxx.xxx:12345 --wait-for-client your-python-code.py'
+ssh -YC xxx.xxx.xxx.xxx 'cd projects/test-debug-server/; DISPLAY=localhost:0.0 python -m debugpy --listen xxx.xxx.xxx.xxx:12345 --wait-for-client your-python-code.py 1>/dev/null 2>/dev/null'
 ```
 with the correct DISPLAY environment variable.
 
