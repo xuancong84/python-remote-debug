@@ -22,7 +22,7 @@ In practice, the detailed steps are as follows:
             "type": "python",
             "request": "attach",
             "connect": {
-                "host": "xxx.xxx.xxx.xxx:12345",
+                "host": "xxx.xxx.xxx.xxx",
                 "port": 12345
             },
             "pathMappings": [
@@ -70,3 +70,6 @@ ssh -YC xxx.xxx.xxx.xxx 'cd projects/test-debug-server/; DISPLAY=localhost:0.0 p
 with the correct DISPLAY environment variable.
 
 Remember, as long as you want to display something via X11 tunnel in remote debugging, that SSH session in the separate terminal must be kept running.
+
+## Troubleshooting:
+- On MacOS, since the default file-system is case-insensitive, your local folder name must be in lowercase (remote folder name can be uppercase), otherwise, Python debugger will crash before reaching your own code.
