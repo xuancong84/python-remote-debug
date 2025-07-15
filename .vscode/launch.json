@@ -6,10 +6,10 @@
     "configurations": [
         {
             "name": "Python: Remote Attach",
-            "type": "python",
+            "type": "debugpy",
             "request": "attach",
             "connect": {
-                "host": "10.8.0.6",
+                "host": "xxx.xxx.xxx.xxx",
                 "port": 12345
             },
             "pathMappings": [
@@ -19,7 +19,8 @@
                 }
             ],
             "preLaunchTask": "prepare",
-            "justMyCode": true
+			"postDebugTask": "cleanup",
+            "justMyCode": false
         }
     ]
 }

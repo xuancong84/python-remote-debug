@@ -7,6 +7,7 @@ Firstly, it is important to understand the basic principle of how remote debug s
 1. Ensure local repository and remote repository files are synchronized, you can use `sshfs` to mount "the project folder on the server" onto "some local folder mount point" without copying over files. The command line is `sshfs <username>@<server-IP>:<remote-folder> <local-folder>`
 2. On the server side, launch the debug server using Python pip package `debugpy`, and listen on a chosen port number (not blocked by firewall)
 3. On the local side, perform attach remote debugger to the chosen port number, and then start debugging
+4. After debugging finished (upon debugger detach), kill the Python process (if you need)
 
 ## Basic Steps:
 In practice, the detailed steps are as follows:
@@ -19,7 +20,7 @@ In practice, the detailed steps are as follows:
     "configurations": [
         {
             "name": "Python: Remote Attach",
-            "type": "python",
+            "type": "debugpy",
             "request": "attach",
             "connect": {
                 "host": "xxx.xxx.xxx.xxx",
@@ -32,14 +33,15 @@ In practice, the detailed steps are as follows:
                 }
             ],
             "preLaunchTask": "prepare",
+            "postDebugTask": "cleanup",
             "justMyCode": true
         }
     ]
 }
 ```
-Take note of the project's root folder mapping between local and remote, and add a new entry `"preLaunchTask": "prepare"` into `launch.json` .
+Take note of the project's root folder mapping between local and remote, and add two new entries `"preLaunchTask": "prepare"` and `"postDebugTask": "cleanup"` into `launch.json` .
 
-## Add pre-launch task to automate the launch process
+## Add pre-launch and post-launch tasks to automate the launch process
 To simply the launch process into a single click, you will need to create a pre-launch task that does Step 1 and 2. In the `terminal` menu, click `configure tasks...`, and choose `create tasks.json file from template`, and select `others`. Edit `tasks.json` as follows:
 ```
 {
@@ -49,11 +51,16 @@ To simply the launch process into a single click, you will need to create a pre-
             "label": "prepare",
             "type": "shell",
             "command": "ssh xxx.xxx.xxx.xxx 'cd projects/test-debug-server/; python -m debugpy --listen xxx.xxx.xxx.xxx:12345 --wait-for-client your-python-code.py 1>/dev/null 2>/dev/null' & while ! ssh xxx.xxx.xxx.xxx netstat -tnl | grep :12345; do sleep 0.1; done"
+        },
+        {
+            "label": "cleanup",
+            "type": "shell",
+            "command": "ssh xxx.xxx.xxx.xxx 'bash -lc \"killallbyname [^0-9]12345[^0-9]\"'"
         }
     ]
 }
 ```
-where all symbols are defined in the same way as in Step 2 above. The full command consists of two parts: 1. launch the remote debug server via ssh and set it to background; 2. wait for the debug port to be ready. Take note that `1>/dev/null 2>/dev/null` is neccessary if your program has STDOUT/STDERR output.
+where all symbols are defined in the same way as in Step 2 above. The full pre-launch command consists of two parts: 1. launch the remote debug server via ssh and set it to background; 2. wait for the debug port to be ready. Take note that `1>/dev/null 2>/dev/null` is neccessary if your program has STDOUT/STDERR output. The post-debug command will SSH into the server and kill the Python process. In your server environment, `killallbyname` should be aliased to `ps aux | grep "$1" | sed '/grep/d' | awk '{print $2}' | xargs kill $2`
 
 ## X11 tunneling for GUI
 If you need to use Python graphics libraries like `matplotlib` to plot charts, you will need X11 tunneling via SSH. To do so:
